@@ -105,8 +105,8 @@ main {
     outline: none;
     cursor: pointer;
     flex: 1;
-    /* シンプルな▼アイコンを背景に設定 */
-    background-image: url('data:image/svg+xml;utf8,<svg fill="%23cbd5e1" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    /* スマホ対応: 確実に表示されるようURLエンコード済みのSVGを使用 */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 8px center;
 }

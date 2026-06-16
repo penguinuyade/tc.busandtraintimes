@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>バス・電車 時刻表案内</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="ticker-container">
+        <div class="ticker-text">⚠️ 遅延については考慮されていません。ご了承ください。 ⚠️ 遅延については考慮されていません。ご了承ください。</div>
+    </div>
+
+    <header>
+        <h1>時刻表案内</h1>
+        <button id="settings-btn" class="icon-btn">⚙️ 設定</button>
+    </header>
+
+    <main>
+        <section class="info-section bus-theme">
+            <h2 id="bus-section-title">🚌 次のバス</h2>
+            
+            <div id="shuttle-reservation" class="reservation-box hidden">
+                <a href="https://shuttlebus.kutc.kansai-u.ac.jp/" target="_blank" rel="noopener noreferrer" class="reserve-btn">📅 シャトルバス予約サイトへ</a>
+            </div>
+
+            <ul id="bus-list" class="time-list">
+                <li class="list-item">読み込み中...</li>
+            </ul>
+        </section>
+
+        <section class="info-section train-theme">
+            <h2 id="train-section-title">🚆 次の電車</h2>
+            <p id="train-notice" class="notice-text"></p>
+            <ul id="train-list" class="time-list">
+                <li class="list-item">読み込み中...</li>
+            </ul>
+        </section>
+    </main>
+
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>設定</h2>
+            
+            <div class="form-group">
+                <label for="bus-type">バスの種類:</label>
+                <select id="bus-type">
+                    <option value="city">市営バス</option>
+                    <option value="shuttle">シャトルバス (1〜3号車)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="train-dir">電車の方面:</label>
+                <select id="train-dir">
+                    <option value="osaka">大阪方面 (姫路・西明石)</option>
+                    <option value="kyoto">京都方面 (京都・米原)</option>
+                </select>
+            </div>
+
+            <button id="save-btn" class="primary-btn">保存して閉じる</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -7,7 +7,7 @@
 
 body {
     font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-    background-color: #0f172a; /* 深いダークブルー系の背景 */
+    background-color: #0f172a; /* ダークブルー背景 */
     color: #e2e8f0;
     line-height: 1.6;
 }
@@ -17,7 +17,7 @@ header, main {
     margin: 0 auto;
 }
 
-/* --- 上部警告テロップ（控えめなオレンジ発光） --- */
+/* --- 上部警告テロップ --- */
 .ticker-container {
     background-color: #1e293b;
     border-bottom: 1px solid #f59e0b;
@@ -44,12 +44,10 @@ header, main {
 
 /* --- ヘッダー --- */
 header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
     background-color: #1e293b;
     border-bottom: 1px solid #38bdf8;
     padding: 15px 20px;
+    text-align: center;
     box-shadow: 0 2px 10px rgba(56, 189, 248, 0.15);
 }
 
@@ -57,24 +55,6 @@ header h1 {
     font-size: 1.2rem;
     color: #e0f2fe;
     text-shadow: 0 0 4px rgba(56, 189, 248, 0.5);
-}
-
-.icon-btn {
-    background: transparent;
-    border: 1px solid #38bdf8;
-    color: #38bdf8;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    font-weight: bold;
-    box-shadow: inset 0 0 4px rgba(56, 189, 248, 0.2);
-    transition: 0.2s;
-}
-
-.icon-btn:hover {
-    background: rgba(56, 189, 248, 0.1);
-    box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
 }
 
 /* --- メインレイアウト --- */
@@ -85,20 +65,59 @@ main {
 .info-section {
     background: #1e293b;
     border-radius: 12px;
-    padding: 20px;
+    padding: 18px;
     margin-bottom: 25px;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.bus-theme h2 { color: #38bdf8; border-bottom: 2px solid #38bdf8; text-shadow: 0 0 4px rgba(56,189,248,0.4); }
-.train-theme h2 { color: #c084fc; border-bottom: 2px solid #c084fc; text-shadow: 0 0 4px rgba(192,132,252,0.4); }
-
-.info-section h2 {
-    font-size: 1.15rem;
-    padding-bottom: 8px;
+.section-header {
     margin-bottom: 15px;
+    padding-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
+.bus-theme .section-header { border-bottom: 2px solid #38bdf8; }
+.train-theme .section-header { border-bottom: 2px solid #c084fc; }
+
+.section-header h2 {
+    font-size: 1.15rem;
+}
+.bus-theme h2 { color: #38bdf8; text-shadow: 0 0 4px rgba(56,189,248,0.4); }
+.train-theme h2 { color: #c084fc; text-shadow: 0 0 4px rgba(192,132,252,0.4); }
+
+/* --- インラインコントロール (セレクトボックス) --- */
+.train-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.inline-select {
+    padding: 8px 10px;
+    border-radius: 6px;
+    background-color: #0f172a;
+    color: #e2e8f0;
+    font-size: 0.9rem;
+    font-weight: bold;
+    outline: none;
+    cursor: pointer;
+    flex: 1;
+}
+
+.bus-select {
+    border: 1px solid #38bdf8;
+    box-shadow: inset 0 0 4px rgba(56,189,248,0.2);
+}
+.bus-select:focus { box-shadow: 0 0 8px rgba(56,189,248,0.5); }
+
+.train-select {
+    border: 1px solid #c084fc;
+    box-shadow: inset 0 0 4px rgba(192,132,252,0.2);
+}
+.train-select:focus { box-shadow: 0 0 8px rgba(192,132,252,0.5); }
+
+/* --- 通知・ボタン --- */
 .notice-text {
     font-size: 0.85rem;
     color: #cbd5e1;
@@ -110,7 +129,6 @@ main {
     box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
 }
 
-/* --- シャトル予約ボタン --- */
 .reservation-box { margin-bottom: 15px; }
 
 .reserve-btn {
@@ -121,30 +139,25 @@ main {
     color: #34d399;
     text-align: center;
     text-decoration: none;
-    padding: 12px;
-    border-radius: 8px;
+    padding: 10px;
+    border-radius: 6px;
     font-weight: bold;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     text-shadow: 0 0 3px rgba(16,185,129,0.5);
     box-shadow: 0 0 8px rgba(16,185,129,0.15), inset 0 0 4px rgba(16,185,129,0.2);
     transition: 0.2s;
 }
 
-.reserve-btn:hover { background-color: rgba(16, 185, 129, 0.2); }
-
 /* --- リストアイテム --- */
 .time-list { list-style: none; }
-
 .list-item {
     display: flex;
     align-items: center;
     padding: 14px 5px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
-
 .list-item:last-child { border-bottom: none; }
 
-/* 縦ラインを揃えるための固定幅 */
 .time-item {
     font-size: 1.25rem;
     font-weight: bold;
@@ -155,21 +168,31 @@ main {
 .train-theme .time-item { color: #e2e8f0; }
 
 .type-item {
-    width: 55px; /* 種別バッジの幅固定 */
+    width: 55px;
     text-align: center;
     padding: 4px 0;
     border-radius: 4px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: bold;
     margin-right: 15px;
     flex-shrink: 0;
 }
 
-/* 電車種別の色指定（控えめなネオン） */
-.type-limited-express { color: #fca5a5; border: 1px solid #ef4444; background: rgba(239, 68, 68, 0.1); box-shadow: 0 0 4px rgba(239,68,68,0.3); } /* 特急: 赤 */
-.type-special-rapid   { color: #93c5fd; border: 1px solid #3b82f6; background: rgba(59, 130, 246, 0.1); box-shadow: 0 0 4px rgba(59,130,246,0.3); } /* 新快速: 青 */
-.type-rapid           { color: #fdba74; border: 1px solid #f97316; background: rgba(249, 115, 22, 0.1); box-shadow: 0 0 4px rgba(249,115,22,0.3); } /* 快速: オレンジ */
-.type-local           { color: #f8fafc; border: 1px solid #cbd5e1; background: rgba(255, 255, 255, 0.05); box-shadow: 0 0 4px rgba(255,255,255,0.2); } /* 普通: 白 */
+/* --- 電車種別の色指定（JR / 阪急） --- */
+/* 紫 (阪急:快速特急) */
+.type-hk-rapid-ltd { color: #d8b4fe; border: 1px solid #a855f7; background: rgba(168,85,247,0.1); box-shadow: 0 0 4px rgba(168,85,247,0.3); }
+/* 赤 (阪急:特急・準特急・通勤特急 / JR:特急) */
+.type-ltd-exp { color: #fca5a5; border: 1px solid #ef4444; background: rgba(239, 68, 68, 0.1); box-shadow: 0 0 4px rgba(239,68,68,0.3); }
+/* 黄 (阪急:急行) */
+.type-hk-exp { color: #fde047; border: 1px solid #eab308; background: rgba(234, 179, 8, 0.1); box-shadow: 0 0 4px rgba(234,179,8,0.3); }
+/* 青 (阪急:快速 / JR:新快速) */
+.type-blue-rapid { color: #93c5fd; border: 1px solid #3b82f6; background: rgba(59, 130, 246, 0.1); box-shadow: 0 0 4px rgba(59,130,246,0.3); }
+/* オレンジ (JR:快速) */
+.type-jr-rapid { color: #fdba74; border: 1px solid #f97316; background: rgba(249, 115, 22, 0.1); box-shadow: 0 0 4px rgba(249,115,22,0.3); }
+/* 緑 (阪急:準急) */
+.type-hk-semi { color: #86efac; border: 1px solid #22c55e; background: rgba(34, 197, 94, 0.1); box-shadow: 0 0 4px rgba(34,197,94,0.3); }
+/* 白 (普通) */
+.type-local { color: #f8fafc; border: 1px solid #cbd5e1; background: rgba(255, 255, 255, 0.05); box-shadow: 0 0 4px rgba(255,255,255,0.2); }
 
 .dest-item {
     flex-grow: 1;
@@ -187,87 +210,10 @@ main {
     line-height: 1.4;
     flex-shrink: 0;
 }
-
 .arrival-item strong {
     font-size: 1.1rem;
     color: #38bdf8;
     text-shadow: 0 0 3px rgba(56,189,248,0.4);
-}
-
-/* --- モーダル (設定画面) --- */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.6);
-    backdrop-filter: blur(3px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal.hidden { display: none; }
-
-.modal-content {
-    background: #1e293b;
-    border: 1px solid #475569;
-    width: 90%;
-    max-width: 400px;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
-}
-
-.modal-content h2 {
-    margin-bottom: 20px;
-    font-size: 1.2rem;
-    text-align: center;
-    color: #e2e8f0;
-}
-
-.form-group { margin-bottom: 20px; }
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    font-size: 0.9rem;
-    color: #94a3b8;
-}
-
-.form-group select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #475569;
-    border-radius: 6px;
-    font-size: 1rem;
-    background-color: #0f172a;
-    color: #e2e8f0;
-    outline: none;
-}
-.form-group select:focus {
-    border-color: #38bdf8;
-    box-shadow: 0 0 5px rgba(56,189,248,0.4);
-}
-
-.primary-btn {
-    width: 100%;
-    background-color: transparent;
-    border: 1px solid #38bdf8;
-    color: #38bdf8;
-    padding: 12px;
-    font-size: 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    box-shadow: inset 0 0 5px rgba(56,189,248,0.2);
-    transition: 0.2s;
-}
-.primary-btn:hover {
-    background: rgba(56, 189, 248, 0.1);
-    box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
 }
 
 .hidden { display: none !important; }

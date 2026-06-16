@@ -7,7 +7,7 @@
 
 body {
     font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-    background-color: #0f172a; /* ダークブルー背景 */
+    background-color: #0f172a; 
     color: #e2e8f0;
     line-height: 1.6;
 }
@@ -72,10 +72,10 @@ main {
 
 .section-header {
     margin-bottom: 15px;
-    padding-bottom: 10px;
+    padding-bottom: 15px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 }
 
 .bus-theme .section-header { border-bottom: 2px solid #38bdf8; }
@@ -87,14 +87,16 @@ main {
 .bus-theme h2 { color: #38bdf8; text-shadow: 0 0 4px rgba(56,189,248,0.4); }
 .train-theme h2 { color: #c084fc; text-shadow: 0 0 4px rgba(192,132,252,0.4); }
 
-/* --- インラインコントロール (セレクトボックス) --- */
+/* --- シンプルなセレクトボックス (▼のみ追加) --- */
 .train-controls {
     display: flex;
-    gap: 8px;
+    gap: 10px;
 }
 
 .inline-select {
-    padding: 8px 10px;
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 8px 30px 8px 10px; /* 右側に▼用の余白を確保 */
     border-radius: 6px;
     background-color: #0f172a;
     color: #e2e8f0;
@@ -103,19 +105,20 @@ main {
     outline: none;
     cursor: pointer;
     flex: 1;
+    /* シンプルな▼アイコンを背景に設定 */
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23cbd5e1" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 8px center;
 }
 
+/* 各テーマごとの控えめな枠線 */
 .bus-select {
     border: 1px solid #38bdf8;
-    box-shadow: inset 0 0 4px rgba(56,189,248,0.2);
 }
-.bus-select:focus { box-shadow: 0 0 8px rgba(56,189,248,0.5); }
 
 .train-select {
     border: 1px solid #c084fc;
-    box-shadow: inset 0 0 4px rgba(192,132,252,0.2);
 }
-.train-select:focus { box-shadow: 0 0 8px rgba(192,132,252,0.5); }
 
 /* --- 通知・ボタン --- */
 .notice-text {
@@ -126,7 +129,6 @@ main {
     padding: 10px;
     border-radius: 6px;
     border-left: 3px solid #c084fc;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
 }
 
 .reservation-box { margin-bottom: 15px; }
@@ -179,19 +181,12 @@ main {
 }
 
 /* --- 電車種別の色指定（JR / 阪急） --- */
-/* 紫 (阪急:快速特急) */
 .type-hk-rapid-ltd { color: #d8b4fe; border: 1px solid #a855f7; background: rgba(168,85,247,0.1); box-shadow: 0 0 4px rgba(168,85,247,0.3); }
-/* 赤 (阪急:特急・準特急・通勤特急 / JR:特急) */
 .type-ltd-exp { color: #fca5a5; border: 1px solid #ef4444; background: rgba(239, 68, 68, 0.1); box-shadow: 0 0 4px rgba(239,68,68,0.3); }
-/* 黄 (阪急:急行) */
 .type-hk-exp { color: #fde047; border: 1px solid #eab308; background: rgba(234, 179, 8, 0.1); box-shadow: 0 0 4px rgba(234,179,8,0.3); }
-/* 青 (阪急:快速 / JR:新快速) */
 .type-blue-rapid { color: #93c5fd; border: 1px solid #3b82f6; background: rgba(59, 130, 246, 0.1); box-shadow: 0 0 4px rgba(59,130,246,0.3); }
-/* オレンジ (JR:快速) */
 .type-jr-rapid { color: #fdba74; border: 1px solid #f97316; background: rgba(249, 115, 22, 0.1); box-shadow: 0 0 4px rgba(249,115,22,0.3); }
-/* 緑 (阪急:準急) */
 .type-hk-semi { color: #86efac; border: 1px solid #22c55e; background: rgba(34, 197, 94, 0.1); box-shadow: 0 0 4px rgba(34,197,94,0.3); }
-/* 白 (普通) */
 .type-local { color: #f8fafc; border: 1px solid #cbd5e1; background: rgba(255, 255, 255, 0.05); box-shadow: 0 0 4px rgba(255,255,255,0.2); }
 
 .dest-item {

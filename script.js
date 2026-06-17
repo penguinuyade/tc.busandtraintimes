@@ -1,47 +1,50 @@
 // --- 設定パラメータ ---
 const SETTINGS = {
-    busType: 'city', // 'city', 'shuttle'
-    trainLine: 'jr', // 'jr', 'hankyu'
-    trainDir: 'osaka' // JR: 'osaka', 'kyoto' / 阪急: 'umeda', 'kawaramachi'
+    busType: 'city',
+    trainLine: 'jr',
+    trainDir: 'osaka' // デフォルトは大阪方面
 };
 
 const SHUTTLE_SCHEDULE = ['14:40', '16:20', '18:00'];
 
+// データの格納先
 let cityBusData = [];
 let trainDataJROsaka = [];
 let trainDataJRKyoto = [];
 let trainDataHankyuKawaramachi = [];
+let trainDataHankyuUmeda = [];
+
+// 乗車予定のバス情報
+let boardedBus = null;
+let currentDisplayedBuses = []; 
 
 // --- アプリケーション初期化 ---
 document.addEventListener('DOMContentLoaded', async () => {
     setupEventListeners();
     await fetchAllData();
     updateDisplay();
-    setInterval(updateDisplay, 60000);
+    setInterval(updateDisplay, 60000); // 1分ごとに更新
 });
 
 // --- CSVデータの取得と解析 ---
 async function fetchAllData() {
     try {
-        const [busRes, jrOsakaRes, jrKyotoRes, hkKawaramachiRes] = await Promise.all([
+        const [busRes, jrOsakaRes, jrKyotoRes, hkKawaramachiRes, hkUmedaRes] = await Promise.all([
             fetch('Excelfile/関西大学バス時刻表_平日.csv'),
             fetch('Excelfile/高槻駅時刻表_姫路西明石方面.csv'),
             fetch('Excelfile/高槻駅時刻表 _京都米原方面.csv'),
-            fetch('Excelfile/高槻市駅時刻表_阪急京都方面_平日.csv')
+            fetch('Excelfile/高槻市駅時刻表_阪急京都方面_平日.csv'),
+            fetch('Excelfile/高槻市駅時刻表_阪急大阪方面_平日.csv') 
         ]);
 
-        const busText = await busRes.text();
-        const jrOsakaText = await jrOsakaRes.text();
-        const jrKyotoText = await jrKyotoRes.text();
-        const hkKawaText = await hkKawaramachiRes.text();
-
-        cityBusData = parseCSV(busText, 3, 1, -1, 2); 
-        trainDataJROsaka = parseCSV(jrOsakaText, 2, 1, 2, 3); 
-        trainDataJRKyoto = parseCSV(jrKyotoText, 2, 1, 2, 3); 
-        trainDataHankyuKawaramachi = parseCSV(hkKawaText, 2, 1, 2, 3); // 阪急CSVパース
+        cityBusData = parseCSV(await busRes.text(), 3, 1, -1, 2); 
+        trainDataJROsaka = parseCSV(await jrOsakaRes.text(), 2, 1, 2, 3); 
+        trainDataJRKyoto = parseCSV(await jrKyotoRes.text(), 2, 1, 2, 3); 
+        trainDataHankyuKawaramachi = parseCSV(await hkKawaramachiRes.text(), 2, 1, 2, 3);
+        trainDataHankyuUmeda = parseCSV(await hkUmedaRes.text(), 2, 1, 2, 3); 
     } catch (error) {
         console.error("データの読み込みに失敗しました:", error);
-        alert("時刻表データの読み込みに失敗しました。Excelfileフォルダと4つのCSVファイル名を確認してください。");
+        alert("データの読み込みに失敗しました。5つのCSVファイルが揃っているか確認してください。");
     }
 }
 
@@ -52,15 +55,11 @@ function parseCSV(csvText, skipRows, timeColIndex, typeColIndex, destColIndex) {
     for (let i = skipRows; i < lines.length; i++) {
         const cols = lines[i].split(',');
         if (cols.length > timeColIndex && cols[timeColIndex].includes(':')) {
-            const timeStr = cols[timeColIndex].trim();
-            const typeText = typeColIndex !== -1 ? cols[typeColIndex].trim() : '';
-            const destText = destColIndex !== -1 ? cols[destColIndex].trim() : '';
-            
             result.push({
-                timeStr: timeStr,
-                mins: timeToMinutes(timeStr),
-                type: typeText,
-                dest: destText
+                timeStr: cols[timeColIndex].trim(),
+                mins: timeToMinutes(cols[timeColIndex].trim()),
+                type: typeColIndex !== -1 ? cols[typeColIndex].trim() : '',
+                dest: destColIndex !== -1 ? cols[destColIndex].trim() : ''
             });
         }
     }
@@ -84,21 +83,19 @@ function getCurrentMinutes() {
     return now.getHours() * 60 + now.getMinutes();
 }
 
-// 路線の種別ごとにCSSクラスを割り振る
 function getTrainTypeClass(typeStr, line) {
     if (line === 'hankyu') {
-        if (typeStr.includes('快速特急')) return 'type-hk-rapid-ltd'; // 紫
-        if (typeStr.includes('特急')) return 'type-ltd-exp'; // 赤 (特急・準特急・通勤特急)
-        if (typeStr.includes('急行')) return 'type-hk-exp'; // 黄
-        if (typeStr.includes('快速')) return 'type-blue-rapid'; // 青
-        if (typeStr.includes('準急')) return 'type-hk-semi'; // 緑
-        return 'type-local'; // 白
+        if (typeStr.includes('快速特急')) return 'type-hk-rapid-ltd'; 
+        if (typeStr.includes('特急')) return 'type-ltd-exp'; 
+        if (typeStr.includes('急行')) return 'type-hk-exp'; 
+        if (typeStr.includes('快速')) return 'type-blue-rapid'; 
+        if (typeStr.includes('準急')) return 'type-hk-semi'; 
+        return 'type-local'; 
     } else {
-        // JR
-        if (typeStr.includes('特急')) return 'type-ltd-exp'; // 赤
-        if (typeStr.includes('新快速')) return 'type-blue-rapid'; // 青
-        if (typeStr.includes('快速')) return 'type-jr-rapid'; // オレンジ
-        return 'type-local'; // 白
+        if (typeStr.includes('特急')) return 'type-ltd-exp'; 
+        if (typeStr.includes('新快速')) return 'type-blue-rapid'; 
+        if (typeStr.includes('快速')) return 'type-jr-rapid'; 
+        return 'type-local'; 
     }
 }
 
@@ -106,23 +103,20 @@ function getTrainTypeClass(typeStr, line) {
 function updateDisplay() {
     const currentMins = getCurrentMinutes();
 
-    // 1. バスの制御
+    // シャトルバス予約ボタンの表示切替
     const reservationBox = document.getElementById('shuttle-reservation');
     if (SETTINGS.busType === 'shuttle') {
-        reservationBox.classList.remove('hidden');
+        reservationBox.style.display = 'block';
     } else {
-        reservationBox.classList.add('hidden');
+        reservationBox.style.display = 'none';
     }
 
+    // 次のバスの計算
     let nextBuses = [];
     if (SETTINGS.busType === 'city') {
         const filtered = cityBusData.filter(b => b.mins >= currentMins).slice(0, 3);
         nextBuses = filtered.map(b => ({
-            timeStr: b.timeStr,
-            mins: b.mins,
-            dest: b.dest,
-            offset: 30,
-            label: '到着時刻'
+            timeStr: b.timeStr, mins: b.mins, dest: b.dest, offset: 30, label: '到着時刻'
         }));
     } else {
         const nextTargetTime = SHUTTLE_SCHEDULE.find(timeStr => timeToMinutes(timeStr) >= currentMins);
@@ -135,47 +129,76 @@ function updateDisplay() {
             ];
         }
     }
+    
+    currentDisplayedBuses = nextBuses; 
 
+    // 乗車予定のバスの描画
+    const boardedBusContainer = document.getElementById('boarded-bus-container');
+    const boardedBusList = document.getElementById('boarded-bus-list');
+    boardedBusList.innerHTML = '';
+    
+    if (boardedBus) {
+        boardedBusContainer.style.display = 'block';
+        
+        const li = document.createElement('li');
+        li.className = 'list-item boarded-bus clickable-bus';
+        const arrivalTimeStr = minutesToTime(boardedBus.mins + boardedBus.offset);
+        
+        li.innerHTML = `
+            <span class="time-item">${boardedBus.timeStr}</span>
+            <span class="dest-item">${boardedBus.dest}</span>
+            <span class="arrival-item">${boardedBus.label}<br><strong>${arrivalTimeStr}</strong></span>
+        `;
+        
+        li.onclick = () => {
+            showConfirmModal(boardedBus, true); 
+        };
+        boardedBusList.appendChild(li);
+    } else {
+        boardedBusContainer.style.display = 'none';
+    }
+
+    // 通常のバスリストを描画
     renderBuses(nextBuses);
 
-    // 2. 電車の制御
+    // 電車の描画と基準時間の計算
     const trainList = document.getElementById('train-list');
     const trainNotice = document.getElementById('train-notice');
 
-    if (nextBuses.length > 0) {
-        // バス到着時間
-        let baseArrivalMins = nextBuses[0].mins + nextBuses[0].offset;
+    let referenceBus = boardedBus ? boardedBus : (nextBuses.length > 0 ? nextBuses[0] : null);
+    let baseArrivalMins = 0;
+    let isHankyu = (SETTINGS.trainLine === 'hankyu');
+
+    if (referenceBus) {
+        // バスがある場合は、バスの到着時間を基準にする
+        baseArrivalMins = referenceBus.mins + referenceBus.offset;
         
-        // 阪急の場合は+15分の移動時間を追加
-        let isHankyu = (SETTINGS.trainLine === 'hankyu');
         if (isHankyu) {
-            baseArrivalMins += 15;
-            trainNotice.textContent = `※バス到着時間から阪急駅への移動(+15分)を考慮した ${minutesToTime(baseArrivalMins)} 以降の電車`;
+            baseArrivalMins += 15; 
+            trainNotice.textContent = boardedBus 
+                ? `※乗車予定のバスに合わせて 阪急駅への移動(+15分)を考慮した ${minutesToTime(baseArrivalMins)} 以降の電車`
+                : `※直近バス到着から 阪急駅への移動(+15分)を考慮した ${minutesToTime(baseArrivalMins)} 以降の電車`;
         } else {
-            trainNotice.textContent = `※直近のバスが駅に到着する ${minutesToTime(baseArrivalMins)} 以降の電車`;
+            trainNotice.textContent = boardedBus
+                ? `※乗車予定のバスが駅に到着する ${minutesToTime(baseArrivalMins)} 以降の電車`
+                : `※直近のバスが駅に到着する ${minutesToTime(baseArrivalMins)} 以降の電車`;
         }
-        
-        // 対象のデータを取得
-        let targetTrainData = [];
-        if (SETTINGS.trainLine === 'jr') {
-            targetTrainData = (SETTINGS.trainDir === 'osaka') ? trainDataJROsaka : trainDataJRKyoto;
-        } else {
-            if (SETTINGS.trainDir === 'umeda') {
-                // 梅田方面はデータなしのため特殊処理
-                trainList.innerHTML = '<li class="list-item" style="color:#fcd34d;">梅田・天下茶屋方面は COMING SOON...</li>';
-                return;
-            } else {
-                targetTrainData = trainDataHankyuKawaramachi;
-            }
-        }
-
-        const nextTrains = targetTrainData.filter(t => t.mins >= baseArrivalMins).slice(0, 3);
-        renderTrains(nextTrains, SETTINGS.trainLine);
-
     } else {
-        trainNotice.textContent = "本日のバス運行は終了しました";
-        trainList.innerHTML = '<li class="list-item">表示できる電車がありません</li>';
+        // バスの運行が終了している場合は、現在時刻を基準にする
+        baseArrivalMins = currentMins;
+        trainNotice.textContent = `※本日のバス運行は終了しました。現在時刻(${minutesToTime(baseArrivalMins)}) 以降の電車`;
     }
+        
+    // 基準時間以降の電車データを取得
+    let targetTrainData = [];
+    if (SETTINGS.trainLine === 'jr') {
+        targetTrainData = (SETTINGS.trainDir === 'osaka') ? trainDataJROsaka : trainDataJRKyoto;
+    } else {
+        targetTrainData = (SETTINGS.trainDir === 'umeda') ? trainDataHankyuUmeda : trainDataHankyuKawaramachi;
+    }
+
+    const nextTrains = targetTrainData.filter(t => t.mins >= baseArrivalMins).slice(0, 3);
+    renderTrains(nextTrains, SETTINGS.trainLine);
 }
 
 function renderBuses(buses) {
@@ -187,15 +210,21 @@ function renderBuses(buses) {
         return;
     }
 
-    buses.forEach(bus => {
-        const arrivalTimeStr = minutesToTime(bus.mins + bus.offset);
+    buses.forEach((bus, index) => {
         const li = document.createElement('li');
-        li.className = 'list-item';
+        li.className = 'list-item clickable-bus';
+        const arrivalTimeStr = minutesToTime(bus.mins + bus.offset);
+        
         li.innerHTML = `
             <span class="time-item">${bus.timeStr}</span>
             <span class="dest-item">${bus.dest}</span>
             <span class="arrival-item">${bus.label}<br><strong>${arrivalTimeStr}</strong></span>
         `;
+        
+        li.onclick = () => {
+            showConfirmModal(bus, false);
+        };
+        
         list.appendChild(li);
     });
 }
@@ -222,24 +251,51 @@ function renderTrains(trains, line) {
     });
 }
 
+// --- モーダル表示用関数 ---
+function showConfirmModal(bus, isCancelMode) {
+    const confirmModal = document.getElementById('confirm-modal');
+    if (!bus) return;
+    
+    if (isCancelMode) {
+        document.getElementById('confirm-msg').textContent = "乗車予定を取り消しますか？";
+    } else {
+        document.getElementById('confirm-msg').textContent = "このバスに乗車しますか？";
+    }
+    
+    document.getElementById('confirm-bus-info').innerHTML = `
+        ${bus.timeStr} 発 <br>
+        <span style="font-size:0.9rem; font-weight:normal;">${bus.dest}</span>
+    `;
+    
+    const yesBtn = document.getElementById('confirm-yes');
+    yesBtn.onclick = () => {
+        if (isCancelMode) {
+            boardedBus = null; // 取消
+        } else {
+            boardedBus = bus;  // 乗車
+        }
+        confirmModal.style.display = 'none';
+        updateDisplay();
+    };
+    
+    confirmModal.style.display = 'flex';
+}
+
 // --- イベントリスナー設定 ---
 function setupEventListeners() {
     const busTypeSelect = document.getElementById('bus-type-select');
     const trainLineSelect = document.getElementById('train-line-select');
     const trainDirSelect = document.getElementById('train-dir-select');
 
-    // バス種類の変更
     busTypeSelect.addEventListener('change', (e) => {
         SETTINGS.busType = e.target.value;
         updateDisplay();
     });
 
-    // 路線(JR/阪急)の変更時に方面を切り替える
     trainLineSelect.addEventListener('change', (e) => {
         SETTINGS.trainLine = e.target.value;
         
-        trainDirSelect.innerHTML = ''; // 一旦クリア
-        
+        trainDirSelect.innerHTML = ''; 
         if (SETTINGS.trainLine === 'jr') {
             trainDirSelect.innerHTML = `
                 <option value="osaka">大阪方面 (姫路・西明石)</option>
@@ -248,17 +304,20 @@ function setupEventListeners() {
             SETTINGS.trainDir = 'osaka';
         } else {
             trainDirSelect.innerHTML = `
-                <option value="kawaramachi">京都河原町・桂方面</option>
                 <option value="umeda">梅田・天下茶屋方面</option>
+                <option value="kawaramachi">京都河原町・桂方面</option>
             `;
-            SETTINGS.trainDir = 'kawaramachi';
+            SETTINGS.trainDir = 'umeda';
         }
         updateDisplay();
     });
 
-    // 方面の変更
     trainDirSelect.addEventListener('change', (e) => {
         SETTINGS.trainDir = e.target.value;
         updateDisplay();
+    });
+
+    document.getElementById('confirm-no').addEventListener('click', () => {
+        document.getElementById('confirm-modal').style.display = 'none';
     });
 }
